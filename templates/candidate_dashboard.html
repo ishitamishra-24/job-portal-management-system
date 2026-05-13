@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Candidate Dashboard - Job Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid bg-light">
+    <div class="row">
+        <!-- Dashboard Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
+            <div class="position-sticky">
+                <div class="text-center mb-4">
+                    <img src="https://ui-avatars.com/api/?name={{ session.get('name', 'Candidate') }}&background=0D8ABC&color=fff&size=100" class="rounded-circle mb-3 shadow-sm" alt="Profile">
+                    <h5 class="fw-bold mb-0">{{ session.get('name', 'Candidate Name') }}</h5>
+                    <p class="text-muted-custom small">Candidate Account</p>
+                </div>
+                
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-muted text-uppercase small fw-bold">
+                    <span>Menu</span>
+                </h6>
+                <ul class="nav flex-column mb-auto">
+                    <li class="nav-item">
+                        <a class="sidebar-link active" href="{{ url_for('candidate_dashboard') }}">
+                            <i class="fa-solid fa-chart-pie me-2"></i> Dashboard Overview
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Dashboard Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+                <h1 class="h2 fw-bold">Candidate Dashboard</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{{ url_for('jobs') }}" class="btn btn-sm btn-primary-custom">
+                        <i class="fa-solid fa-magnifying-glass me-1"></i> Find Jobs
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="card card-custom p-3 border-start border-primary border-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted-custom mb-1 fw-medium">Applied Jobs</p>
+                                <h3 class="fw-bold mb-0">{{ total_applied }}</h3>
+                            </div>
+                            <div class="p-3 bg-primary bg-opacity-10 text-primary rounded">
+                                <i class="fa-solid fa-paper-plane fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card card-custom p-3 h-100">
+                        <form action="{{ url_for('upload_resume') }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-center">
+                            <div class="flex-grow-1 me-3">
+                                <label for="resume" class="form-label fw-medium mb-1">Upload Resume (PDF/DOCX)</label>
+                                <input type="file" class="form-control form-control-sm" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+                            </div>
+                            <div class="mt-4 pt-1">
+                                <button type="submit" class="btn btn-sm btn-primary-custom">
+                                    <i class="fa-solid fa-upload me-1"></i> Upload
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Applications Table -->
+            <div class="card card-custom mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0">My Applications</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Job Title</th>
+                                    <th>Company</th>
+                                    <th>Applied Date</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in applied_jobs %}
+                                <tr>
+                                    <td class="ps-4 fw-medium">{{ app.title }}</td>
+                                    <td>{{ app.company_name }}</td>
+                                    <td class="text-muted-custom">{{ app.applied_at.strftime('%b %d, %Y') if app.applied_at else 'Recently' }}</td>
+                                    <td><span class="badge bg-warning text-dark">{{ app.status }}</span></td>
+                                    <td class="text-end pe-4">
+                                        <a href="{{ url_for('job_details', job_id=app.job_id) }}" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-eye"></i></a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">You haven't applied to any jobs yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+        </main>
+    </div>
+</div>
+
+<button class="navbar-toggler position-fixed bottom-0 end-0 m-3 btn btn-primary-custom d-md-none rounded-circle shadow" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" style="width: 60px; height: 60px; z-index: 1050;">
+    <i class="fa-solid fa-bars fs-4"></i>
+</button>
+{% endblock %}

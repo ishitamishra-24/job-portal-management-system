@@ -1,0 +1,280 @@
+/* ===== VARIABLES & THEME ===== */
+:root {
+    --primary-color: #0F172A; /* Navy Blue */
+    --secondary-color: #1E3A8A; /* Lighter Navy */
+    --accent-color: #3B82F6; /* Bright Blue */
+    --accent-hover: #2563EB; 
+    --bg-light: #F8FAFC; /* Light Gray/Blue */
+    --bg-white: #FFFFFF;
+    --text-main: #334155; /* Slate */
+    --text-muted: #64748B;
+    --border-color: #E2E8F0;
+    
+    --transition: all 0.3s ease;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    
+    --border-radius: 0.5rem;
+}
+
+[data-theme="dark"] {
+    --primary-color: #0F172A; 
+    --bg-light: #0B0F19;
+    --bg-white: #1E293B;
+    --text-main: #F1F5F9;
+    --text-muted: #94A3B8;
+    --border-color: #334155;
+}
+
+/* ===== GLOBAL STYLES ===== */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: var(--transition);
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--accent-hover);
+}
+
+/* ===== COMPONENTS ===== */
+.btn-primary-custom {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-primary-custom:hover {
+    background-color: var(--accent-hover);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-outline-custom {
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    background: transparent;
+    padding: 0.5rem 1.5rem;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-outline-custom:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.card-custom {
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.card-custom:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+/* ===== NAVBAR ===== */
+.navbar-custom {
+    background-color: var(--bg-white);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--primary-color) !important;
+    font-size: 1.5rem;
+}
+
+[data-theme="dark"] .navbar-brand {
+    color: white !important;
+}
+
+.nav-link {
+    color: var(--text-main) !important;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: var(--accent-color) !important;
+}
+
+/* ===== HERO SECTION ===== */
+.hero-section {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 100px 0;
+    text-align: center;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+}
+
+.search-box {
+    background: white;
+    padding: 0.5rem;
+    border-radius: 50px;
+    box-shadow: var(--shadow-lg);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+[data-theme="dark"] .search-box {
+    background: var(--bg-white);
+}
+
+.search-input {
+    border: none;
+    padding: 10px 20px;
+    background: transparent;
+    color: var(--text-main);
+}
+
+.search-input:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.search-btn {
+    border-radius: 50px !important;
+    padding: 10px 30px;
+}
+
+/* ===== JOB CARDS ===== */
+.job-card {
+    padding: 1.5rem;
+    height: 100%;
+}
+
+.company-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+    background-color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.job-type-badge {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--accent-color);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* ===== FORMS ===== */
+.form-control, .form-select {
+    background-color: var(--bg-light);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--bg-white);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+    color: var(--text-main);
+}
+
+/* ===== DASHBOARD ===== */
+.sidebar {
+    background-color: var(--bg-white);
+    border-right: 1px solid var(--border-color);
+    min-height: calc(100vh - 76px);
+    padding: 2rem 1rem;
+}
+
+.sidebar-link {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--text-main);
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.sidebar-link:hover, .sidebar-link.active {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--accent-color);
+}
+
+/* ===== FOOTER ===== */
+.footer {
+    background-color: var(--bg-white);
+    border-top: 1px solid var(--border-color);
+    padding: 3rem 0 1.5rem;
+    margin-top: auto;
+}
+
+.footer-link {
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.footer-link:hover {
+    color: var(--accent-color);
+}
+
+/* ===== UTILITIES ===== */
+.text-muted-custom {
+    color: var(--text-muted) !important;
+}
+
+/* Loading animation */
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid var(--border-color);
+    border-bottom-color: var(--accent-color);
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}

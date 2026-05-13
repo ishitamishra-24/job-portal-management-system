@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Job Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card card-custom p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">Welcome Back</h2>
+                    <p class="text-muted-custom">Log in to your account to continue</p>
+                </div>
+                
+                <form action="{{ url_for('login') }}" method="POST" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-medium">Email address</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fa-regular fa-envelope text-muted"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                            <div class="invalid-feedback">Please enter a valid email address.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between">
+                            <label for="password" class="form-label fw-medium">Password</label>
+
+                        </div>
+                        <div class="input-group position-relative">
+                            <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                            <button type="button" class="btn btn-outline-secondary border-start-0 password-toggle">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                            <div class="invalid-feedback">Please enter your password.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label text-muted-custom" for="rememberMe">Remember me</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3">Sign In</button>
+                    
+                    <div class="text-center mt-3">
+                        <span class="text-muted-custom">Don't have an account?</span> 
+                        <a href="{{ url_for('register') }}" class="fw-medium text-decoration-none">Register here</a>
+                    </div>
+                </form>
+                
+                <div class="mt-4 pt-4 border-top">
+                    <div class="alert alert-info py-2 small mb-0">
+                        <strong>Demo Accounts:</strong><br>
+                        Candidate: candidate@test.com / password<br>
+                        Recruiter: recruiter@test.com / password
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

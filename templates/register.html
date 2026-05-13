@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Job Portal{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card card-custom p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">Create an Account</h2>
+                    <p class="text-muted-custom">Join us and find the best opportunities</p>
+                </div>
+
+                <form action="{{ url_for('register') }}" method="POST" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">I am a...</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check w-50 p-3 border rounded card-custom position-relative text-center cursor-pointer">
+                                <input class="form-check-input float-none mx-auto d-block mb-2" type="radio" name="role"
+                                    id="roleCandidate" value="candidate" checked required>
+                                <label class="form-check-label stretched-link fw-medium d-block" for="roleCandidate">
+                                    <i class="fa-solid fa-user mb-1 fs-4 d-block text-primary"></i>
+                                    Candidate
+                                </label>
+                            </div>
+                            <div class="form-check w-50 p-3 border rounded card-custom position-relative text-center cursor-pointer">
+                                <input class="form-check-input float-none mx-auto d-block mb-2" type="radio" name="role"
+                                    id="roleRecruiter" value="recruiter" required>
+                                <label class="form-check-label stretched-link fw-medium d-block" for="roleRecruiter">
+                                    <i class="fa-solid fa-building mb-1 fs-4 d-block text-primary"></i>
+                                    Employer
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-medium">Full Name / Company Name</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="John Doe" required>
+                        <div class="invalid-feedback">Please enter your name.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-medium">Email address</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com"
+                            required>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-medium">Password</label>
+                        <div class="input-group position-relative">
+                            <input type="password" class="form-control" id="password" name="password"
+                                placeholder="Create a strong password" required minlength="6">
+                            <button type="button" class="btn btn-outline-secondary border-start-0 password-toggle">
+                                <i class="fa-regular fa-eye"></i>
+                            </button>
+                            <div class="invalid-feedback">Password must be at least 6 characters long.</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" class="form-check-input" id="terms" required>
+                        <label class="form-check-label text-muted-custom small" for="terms">
+                            I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#"
+                                class="text-decoration-none">Privacy Policy</a>
+                        </label>
+                        <div class="invalid-feedback">You must agree before submitting.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3">Create Account</button>
+
+                    <div class="text-center mt-3">
+                        <span class="text-muted-custom">Already have an account?</span>
+                        <a href="{{ url_for('login') }}" class="fw-medium text-decoration-none">Log in here</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

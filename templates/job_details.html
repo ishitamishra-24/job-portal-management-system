@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Job Details - Job Portal{% endblock %}
+
+{% block content %}
+<!-- Job Header -->
+<section class="bg-primary text-white py-5" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+            <div class="d-flex align-items-center mb-4 mb-md-0">
+                <div class="company-logo bg-white text-primary me-4" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                    <i class="fa-solid fa-code"></i>
+                </div>
+                <div>
+                    <h1 class="fw-bold mb-2">{{ job.title }}</h1>
+                    <div class="d-flex flex-wrap gap-3 text-white-50 align-items-center">
+                        <span><i class="fa-solid fa-briefcase me-2"></i>{{ job.company_name }}</span>
+                        <span><i class="fa-solid fa-location-dot me-2"></i>{{ job.location }}</span>
+                        <span><i class="fa-regular fa-clock me-2"></i>Posted {{ job.posted_at.strftime('%b %d, %Y') if job.posted_at else 'Recently' }}</span>
+                        <span class="badge bg-white text-primary rounded-pill px-3 py-2">{{ job.job_type }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex flex-column gap-2 text-md-end">
+                <h3 class="fw-bold mb-0 text-white">{{ job.salary if job.salary else 'Not Disclosed' }}</h3>
+                <form action="{{ url_for('apply_job', job_id=job.job_id) }}" method="POST" class="d-inline mt-2">
+                    <button type="submit" class="btn btn-light text-primary fw-bold px-4 py-2 w-100">Apply Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container py-5">
+    <div class="row">
+        <!-- Main Details -->
+        <div class="col-lg-8 mb-4 mb-lg-0">
+            <div class="card card-custom p-4 p-md-5 mb-4">
+                <h4 class="fw-bold mb-4">Job Description</h4>
+                
+                <p class="text-muted-custom mb-4" style="white-space: pre-wrap;">{{ job.skills_required }}</p>
+                
+            </div>
+        </div>
+        
+        <!-- Sidebar Details -->
+        <div class="col-lg-4">
+            <!-- Company Info -->
+            <div class="card card-custom p-4 mb-4">
+                <h5 class="fw-bold mb-4">Company Overview</h5>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="company-logo me-3">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">{{ job.company_name }}</h6>
+                    </div>
+                </div>
+                <p class="text-muted-custom small mb-4">
+                    Leading provider of innovative products and services in the industry.
+                </p>
+            </div>
+            
+            <!-- Actions -->
+            <div class="card card-custom p-4">
+                <h5 class="fw-bold mb-3">Job Overview</h5>
+                
+                <div class="d-flex align-items-center mb-3">
+                    <i class="fa-regular fa-calendar text-primary me-3 fs-5"></i>
+                    <div>
+                        <div class="text-muted-custom small">Date Posted</div>
+                        <div class="fw-medium">{{ job.posted_at.strftime('%b %d, %Y') if job.posted_at else 'Recently' }}</div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center mb-4">
+                    <i class="fa-solid fa-layer-group text-primary me-3 fs-5"></i>
+                    <div>
+                        <div class="text-muted-custom small">Job Type</div>
+                        <div class="fw-medium">{{ job.job_type }}</div>
+                    </div>
+                </div>
+                
+                <form action="{{ url_for('save_job', job_id=job.job_id) }}" method="POST">
+                    <button type="submit" class="btn btn-outline-custom w-100 mb-2"><i class="fa-regular fa-bookmark me-2"></i> Save Job</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Similar Jobs Section -->
+    {% if similar_jobs %}
+    <div class="mt-5 pt-4 border-top">
+        <h3 class="fw-bold mb-4">Similar Jobs</h3>
+        <div class="row g-4">
+            {% for s_job in similar_jobs %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card card-custom job-card">
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="company-logo">
+                            <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                        <span class="job-type-badge">{{ s_job.job_type }}</span>
+                    </div>
+                    <h5 class="fw-bold mb-1"><a href="{{ url_for('job_details', job_id=s_job.job_id) }}" class="text-decoration-none text-reset">{{ s_job.title }}</a></h5>
+                    <p class="text-muted-custom mb-3"><i class="fa-solid fa-briefcase me-2"></i>{{ s_job.company_name }}</p>
+                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                        <span class="fw-bold text-primary">{{ s_job.salary if s_job.salary else 'Not Disclosed' }}</span>
+                        <a href="{{ url_for('job_details', job_id=s_job.job_id) }}" class="btn btn-outline-custom btn-sm">View</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
