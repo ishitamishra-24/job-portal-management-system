@@ -1,57 +1,63 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Job Portal{% endblock %}</title>
-    
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
+    <!-- Google Fonts: Outfit, Plus Jakarta Sans, Poppins, Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
 
-    <!-- Navbar -->
+    <!-- Dynamic Futuristic Glowing Ambient Orbs -->
+    <div class="glowing-orb glowing-orb-1"></div>
+    <div class="glowing-orb glowing-orb-2"></div>
+    <div class="glowing-orb glowing-orb-3"></div>
+
+    <!-- Frosted Glass Navbar -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="{{ url_for('home') }}">
-                <i class="fa-solid fa-briefcase text-primary me-2"></i>JobPortal
+            <a class="navbar-brand text-gradient-purple-pink" href="{{ url_for('home') }}">
+                <i class="fa-solid fa-bolt me-2"></i>JobPortal
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler border-0 p-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars text-white fs-4"></i>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                        <a class="nav-link" href="{{ url_for('home') }}"><i class="fa-solid fa-house-chimney me-1"></i> Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('jobs') }}">Find Jobs</a>
+                        <a class="nav-link" href="{{ url_for('jobs') }}"><i class="fa-solid fa-compass me-1"></i> Explore Jobs</a>
                     </li>
-
                 </ul>
-                <div class="d-flex align-items-center">
-                    <button id="theme-toggle" class="btn btn-link nav-link me-3 p-0" title="Toggle Theme">
-                        <i class="fa-solid fa-moon fs-5"></i>
+                <div class="d-flex align-items-center gap-3">
+                    <button id="theme-toggle" class="btn btn-link nav-link p-0" title="Toggle Theme">
+                        <i class="fa-solid fa-sun fs-5"></i>
                     </button>
-                    
+
                     {% if session.get('user_id') %}
                         {% if session.get('role') == 'candidate' %}
-                            <a href="{{ url_for('candidate_dashboard') }}" class="btn btn-outline-custom me-2">Dashboard</a>
+                            <a href="{{ url_for('candidate_dashboard') }}" class="btn btn-outline-custom">Dashboard</a>
                         {% elif session.get('role') == 'recruiter' %}
-                            <a href="{{ url_for('recruiter_dashboard') }}" class="btn btn-outline-custom me-2">Dashboard</a>
+                            <a href="{{ url_for('recruiter_dashboard') }}" class="btn btn-outline-custom">Dashboard</a>
                         {% endif %}
                         <a href="{{ url_for('logout') }}" class="btn btn-primary-custom">Logout</a>
                     {% else %}
-                        <a href="{{ url_for('login') }}" class="btn btn-outline-custom me-2">Login</a>
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-custom">Login</a>
                         <a href="{{ url_for('register') }}" class="btn btn-primary-custom">Register</a>
                     {% endif %}
                 </div>
@@ -59,59 +65,92 @@
         </div>
     </nav>
 
-    <!-- Flash Messages -->
-    <div class="container mt-3">
+    <!-- Alert / Flash Messages Container -->
+    <div class="container mt-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-lg border-0" role="alert" style="background: rgba(18, 24, 38, 0.85); backdrop-filter: blur(12px); color: #fff; border-left: 4px solid {% if category=='success' %}#10b981{% elif category=='danger' %}#ef4444{% else %}#f59e0b{% endif %} !important;">
+            <div class="d-flex align-items-center">
+                <i class="fa-solid {% if category=='success' %}fa-circle-check text-success{% elif category=='danger' %}fa-circle-xmark text-danger{% else %}fa-circle-exclamation text-warning{% endif %} fs-4 me-3"></i>
+                <div>
+                    {{ message }}
+                </div>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
     </div>
 
-    <!-- Main Content -->
-    <main>
+    <!-- Main Section -->
+    <main class="flex-grow-1">
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
+    <!-- Floating Toast Notification Container -->
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1200;"></div>
+
+    <!-- Premium Dark SaaS Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="row gy-4">
-                <div class="col-lg-4 col-md-6">
-                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-briefcase text-primary me-2"></i>JobPortal</h5>
-                    <p class="text-muted-custom">Connecting talented professionals with top companies worldwide. Find your dream job today.</p>
+            <div class="row gy-5">
+                <div class="col-lg-4 col-md-12">
+                    <h5 class="fw-bold mb-3 text-gradient-blue-cyan"><i class="fa-solid fa-bolt me-2"></i>JobPortal</h5>
+                    <p class="text-muted-custom mb-4" style="max-width: 320px;">Connecting next-gen professionals with elite startups and tech organizations globally.</p>
+                    <div class="d-flex gap-3">
+                        <a href="javascript:void(0)" class="social-icon-btn"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="javascript:void(0)" class="social-icon-btn"><i class="fa-brands fa-linkedin-in"></i></a>
+                        <a href="javascript:void(0)" class="social-icon-btn"><i class="fa-brands fa-github"></i></a>
+                    </div>
                 </div>
-                <div class="col-lg-2 col-md-6">
-                    <h5 class="fw-bold mb-3">Candidates</h5>
-                    <a href="{{ url_for('jobs') }}" class="footer-link">Browse Jobs</a>
-                    <a href="{{ url_for('candidate_dashboard') }}" class="footer-link">Dashboard</a>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <h6 class="fw-bold text-uppercase text-white tracking-wider small mb-3">Candidates</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{{ url_for('jobs') }}" class="footer-link">Find Jobs</a></li>
+                        <li class="mb-2"><a href="{{ url_for('candidate_dashboard') }}" class="footer-link">Dashboard</a></li>
+                    </ul>
                 </div>
-                <div class="col-lg-2 col-md-6">
-                    <h5 class="fw-bold mb-3">Employers</h5>
-                    <a href="{{ url_for('recruiter_dashboard') }}" class="footer-link">Post a Job</a>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <h6 class="fw-bold text-uppercase text-white tracking-wider small mb-3">Employers</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="{{ url_for('recruiter_dashboard') }}" class="footer-link">Post a Job</a></li>
+                        <li class="mb-2"><a href="{{ url_for('recruiter_dashboard') }}" class="footer-link">Review Applicants</a></li>
+                    </ul>
                 </div>
-                <div class="col-lg-4 col-md-6">
-                    <h5 class="fw-bold mb-3">Newsletter</h5>
-                    <p class="text-muted-custom">Subscribe to get the latest job updates.</p>
-                    <div class="input-group mb-3">
-                        <input type="email" class="form-control" placeholder="Email address">
-                        <button class="btn btn-primary-custom" type="button">Subscribe</button>
+                <div class="col-lg-4 col-md-12">
+                    <h6 class="fw-bold text-uppercase text-white tracking-wider small mb-3">Newsletter</h6>
+                    <p class="text-muted-custom small mb-3">Get custom hand-picked startup roles in your inbox weekly.</p>
+                    <div class="footer-subscribe-box">
+                        <input type="email" class="form-control" placeholder="Enter your email...">
+                        <button class="btn btn-primary-custom px-3" type="button"><i class="fa-solid fa-arrow-right"></i></button>
                     </div>
                 </div>
             </div>
-            <div class="row mt-4 pt-4 border-top">
-                <div class="col-md-6 text-center text-md-start">
-                    <p class="text-muted-custom mb-0">&copy; 2024 JobPortal. All rights reserved.</p>
+
+            <!-- Corporate Partners Real Branding -->
+            <div class="row mt-5 pt-5 border-top border-secondary border-opacity-10 text-center">
+                <div class="col-12 mb-4">
+                    <span class="text-muted-custom small fw-bold text-uppercase tracking-wider">Backed & Trusted by Top Networks</span>
                 </div>
-                <div class="col-md-6 text-center text-md-end">
-                    <a href="javascript:void(0)" class="text-muted-custom me-3"><i class="fa-brands fa-twitter fs-5"></i></a>
-                    <a href="javascript:void(0)" class="text-muted-custom me-3"><i class="fa-brands fa-linkedin fs-5"></i></a>
-                    <a href="javascript:void(0)" class="text-muted-custom"><i class="fa-brands fa-github fs-5"></i></a>
+                <div class="col-12 d-flex justify-content-center flex-wrap gap-5 align-items-center opacity-40">
+                    <i class="fa-brands fa-aws fs-1 text-white hover-brand-logo"></i>
+                    <i class="fa-brands fa-google fs-1 text-white hover-brand-logo"></i>
+                    <i class="fa-brands fa-microsoft fs-1 text-white hover-brand-logo"></i>
+                    <i class="fa-brands fa-apple fs-1 text-white hover-brand-logo"></i>
+                    <i class="fa-brands fa-github fs-1 text-white hover-brand-logo"></i>
+                    <i class="fa-brands fa-meta fs-1 text-white hover-brand-logo"></i>
+                </div>
+            </div>
+
+            <div class="row mt-5 pt-4 border-top border-secondary border-opacity-10 align-items-center">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="text-muted-custom small mb-0">&copy; 2026 JobPortal. Built with futuristic styling standards.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                    <a href="javascript:void(0)" class="text-muted-custom small me-3 footer-sublink">Terms of Service</a>
+                    <a href="javascript:void(0)" class="text-muted-custom small footer-sublink">Privacy Policy</a>
                 </div>
             </div>
         </div>
@@ -121,5 +160,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
 </body>
+
 </html>

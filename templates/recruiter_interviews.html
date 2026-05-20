@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Interview Management - Job Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid bg-light">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
+            <div class="position-sticky">
+                <div class="text-center mb-4">
+                    <div class="company-logo bg-light text-primary mx-auto mb-3 shadow-sm d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem; border-radius: 50%;">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0 text-dark">{{ session.get('name', 'Company Name') }}</h5>
+                    <p class="text-muted-custom small">Employer Account</p>
+                </div>
+                
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-2 text-muted text-uppercase small fw-bold">
+                    <span>Menu</span>
+                </h6>
+                <ul class="nav flex-column mb-auto">
+                    <li class="nav-item">
+                        <a class="sidebar-link" href="{{ url_for('recruiter_dashboard') }}">
+                            <i class="fa-solid fa-chart-line me-2"></i> Dashboard Overview
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="sidebar-link active" href="{{ url_for('recruiter_interviews') }}">
+                            <i class="fa-solid fa-calendar-days me-2"></i> Interviews
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
+                <h1 class="h2 fw-bold text-dark"><i class="fa-solid fa-calendar-days text-primary me-2"></i>Interview Management</h1>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4 col-12">
+                    <div class="card card-custom p-4 border-start border-primary border-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted-custom small mb-1 fw-bold text-uppercase">Upcoming</p>
+                                <h2 class="fw-bold mb-0 text-dark">{{ total_upcoming }}</h2>
+                            </div>
+                            <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-circle">
+                                <i class="fa-solid fa-calendar-check fs-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-12">
+                    <div class="card card-custom p-4 border-start border-success border-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted-custom small mb-1 fw-bold text-uppercase">Completed</p>
+                                <h2 class="fw-bold mb-0 text-dark">{{ total_completed }}</h2>
+                            </div>
+                            <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle">
+                                <i class="fa-solid fa-circle-check fs-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 col-12">
+                    <div class="card card-custom p-4 border-start border-danger border-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <p class="text-muted-custom small mb-1 fw-bold text-uppercase">Cancelled</p>
+                                <h2 class="fw-bold mb-0 text-dark">{{ total_cancelled }}</h2>
+                            </div>
+                            <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle">
+                                <i class="fa-solid fa-ban fs-3"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upcoming Interviews -->
+            <div class="card card-custom mb-4 border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-clock text-primary me-2"></i>Upcoming Interviews</h5>
+                </div>
+                <div class="card-body">
+                    {% if upcoming %}
+                    <div class="row g-3">
+                        {% for iv in upcoming %}
+                        <div class="col-md-6 col-12">
+                            <div class="interview-card p-3">
+                                <div class="d-flex gap-3">
+                                    <div class="interview-date-badge text-center flex-shrink-0">
+                                        <span class="month">{{ iv.interview_date.strftime('%b') if iv.interview_date else '' }}</span>
+                                        <span class="day">{{ iv.interview_date.strftime('%d') if iv.interview_date else '' }}</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold text-dark mb-1">{{ iv.interview_title }}</h6>
+                                        <p class="text-muted-custom small mb-1">
+                                            <i class="fa-solid fa-user me-1"></i>{{ iv.candidate_name }}
+                                            &bull; <i class="fa-solid fa-briefcase ms-1 me-1"></i>{{ iv.job_title }}
+                                        </p>
+                                        <div class="d-flex flex-wrap gap-2 mb-2">
+                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1">{{ iv.interview_type }}</span>
+                                            <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-1">{{ iv.interview_round }}</span>
+                                            <span class="badge interview-status-scheduled">Scheduled</span>
+                                        </div>
+                                        <div class="small text-muted-custom mb-2">
+                                            <i class="fa-regular fa-clock me-1"></i>
+                                            {% if iv.start_time %}
+                                                {% if iv.start_time is string %}{{ iv.start_time }}{% else %}{{ '%02d:%02d'|format(iv.start_time.seconds // 3600, (iv.start_time.seconds % 3600) // 60) }}{% endif %}
+                                            {% endif %}
+                                            —
+                                            {% if iv.end_time %}
+                                                {% if iv.end_time is string %}{{ iv.end_time }}{% else %}{{ '%02d:%02d'|format(iv.end_time.seconds // 3600, (iv.end_time.seconds % 3600) // 60) }}{% endif %}
+                                            {% endif %}
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            {% if iv.meeting_link %}
+                                            <a href="{{ iv.meeting_link }}" target="_blank" class="btn btn-sm btn-primary-custom py-1 px-2">
+                                                <i class="fa-solid fa-video me-1"></i>Join
+                                            </a>
+                                            {% endif %}
+                                            <a href="{{ url_for('download_ics', interview_id=iv.interview_id) }}" class="btn btn-sm btn-outline-custom py-1 px-2">
+                                                <i class="fa-regular fa-calendar-plus me-1"></i>.ics
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-danger py-1 px-2 cancel-interview-btn" data-interview-id="{{ iv.interview_id }}">
+                                                <i class="fa-solid fa-xmark me-1"></i>Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted-custom">
+                        <i class="fa-regular fa-calendar fs-1 mb-3"></i>
+                        <h6>No Upcoming Interviews</h6>
+                        <p class="small">Schedule interviews from the applicants page to see them here.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Past Interviews -->
+            <div class="card card-custom mb-4 border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-clock-rotate-left text-muted me-2"></i>Past Interviews</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Candidate</th>
+                                    <th>Job Title</th>
+                                    <th>Round</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for iv in past %}
+                                <tr>
+                                    <td class="ps-4 fw-bold">{{ iv.candidate_name }}</td>
+                                    <td>{{ iv.job_title }}</td>
+                                    <td><span class="badge bg-light text-dark border px-3 py-1">{{ iv.interview_round }}</span></td>
+                                    <td class="text-muted-custom">{{ iv.interview_date.strftime('%b %d, %Y') if iv.interview_date else '' }}</td>
+                                    <td><span class="badge interview-status-{{ iv.status|lower }}">{{ iv.status }}</span></td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted-custom">No past interviews yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<button class="navbar-toggler position-fixed bottom-0 end-0 m-3 btn btn-primary-custom d-md-none rounded-circle shadow" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" style="width: 60px; height: 60px; z-index: 1050;">
+    <i class="fa-solid fa-bars fs-4"></i>
+</button>
+{% endblock %}

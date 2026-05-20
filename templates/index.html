@@ -6,19 +6,19 @@
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container">
-        <h1 class="hero-title">Find Your Dream Job Today</h1>
+        <h1 class="hero-title mb-3">Find Your Dream Job Today</h1>
         <p class="fs-5 mb-5 opacity-75">Connect with thousands of employers worldwide and take the next step in your career.</p>
         
         <form action="{{ url_for('jobs') }}" method="GET" class="search-box d-flex flex-column flex-md-row p-2">
-            <div class="flex-grow-1 border-end-md px-2 py-2">
+            <div class="flex-grow-1 px-2 py-2 border-end border-light border-opacity-25">
                 <div class="d-flex align-items-center h-100">
-                    <i class="fa-solid fa-magnifying-glass text-muted ms-2"></i>
+                    <i class="fa-solid fa-magnifying-glass text-white text-opacity-50 ms-2"></i>
                     <input type="text" name="search" class="search-input w-100" placeholder="Job title, keywords, or company" required>
                 </div>
             </div>
             <div class="flex-grow-1 px-2 py-2">
                 <div class="d-flex align-items-center h-100">
-                    <i class="fa-solid fa-location-dot text-muted ms-2"></i>
+                    <i class="fa-solid fa-location-dot text-white text-opacity-50 ms-2"></i>
                     <input type="text" name="location" class="search-input w-100" placeholder="City, state, or remote">
                 </div>
             </div>
@@ -26,33 +26,54 @@
         </form>
         
         <div class="mt-4">
-            <span class="opacity-75 me-2">Popular:</span>
-            <a href="{{ url_for('jobs', search='Designer') }}" class="badge bg-light text-dark text-decoration-none me-1">Designer</a>
-            <a href="{{ url_for('jobs', search='Developer') }}" class="badge bg-light text-dark text-decoration-none me-1">Developer</a>
-            <a href="{{ url_for('jobs', search='Manager') }}" class="badge bg-light text-dark text-decoration-none me-1">Manager</a>
+            <span class="opacity-75 me-2">Popular searches:</span>
+            <a href="{{ url_for('jobs', search='Python') }}" class="badge bg-white bg-opacity-10 text-white text-decoration-none me-1 px-3 py-2">Python</a>
+            <a href="{{ url_for('jobs', search='Developer') }}" class="badge bg-white bg-opacity-10 text-white text-decoration-none me-1 px-3 py-2">Developer</a>
+            <a href="{{ url_for('jobs', search='Manager') }}" class="badge bg-white bg-opacity-10 text-white text-decoration-none me-1 px-3 py-2">Manager</a>
+            <a href="{{ url_for('jobs', search='SQL') }}" class="badge bg-white bg-opacity-10 text-white text-decoration-none me-1 px-3 py-2">SQL</a>
         </div>
     </div>
 </section>
 
-<!-- Stats Section -->
+<!-- Stats Section (Dynamic MySQL Queries) -->
 <section class="py-5 bg-white">
     <div class="container">
-        <div class="row text-center g-4">
-            <div class="col-md-3 col-sm-6">
-                <h2 class="fw-bold text-primary mb-1">10k+</h2>
-                <p class="text-muted-custom mb-0">Active Jobs</p>
+        <div class="row g-4">
+            <div class="col-md-3 col-sm-6 stats-card-container">
+                <div class="card card-custom p-4 text-center border-0 shadow-sm">
+                    <div class="stats-icon-bg bg-primary bg-opacity-10 text-primary">
+                        <i class="fa-solid fa-briefcase fs-4"></i>
+                    </div>
+                    <h2 class="fw-bold mb-1 text-gradient">{{ jobs_count|default(0) }}</h2>
+                    <p class="text-muted-custom mb-0 fw-semibold">Active Jobs</p>
+                </div>
             </div>
-            <div class="col-md-3 col-sm-6">
-                <h2 class="fw-bold text-primary mb-1">5k+</h2>
-                <p class="text-muted-custom mb-0">Companies</p>
+            <div class="col-md-3 col-sm-6 stats-card-container">
+                <div class="card card-custom p-4 text-center border-0 shadow-sm">
+                    <div class="stats-icon-bg bg-success bg-opacity-10 text-success">
+                        <i class="fa-solid fa-building fs-4"></i>
+                    </div>
+                    <h2 class="fw-bold mb-1 text-gradient">{{ companies_count|default(0) }}</h2>
+                    <p class="text-muted-custom mb-0 fw-semibold">Companies</p>
+                </div>
             </div>
-            <div class="col-md-3 col-sm-6">
-                <h2 class="fw-bold text-primary mb-1">2M+</h2>
-                <p class="text-muted-custom mb-0">Candidates</p>
+            <div class="col-md-3 col-sm-6 stats-card-container">
+                <div class="card card-custom p-4 text-center border-0 shadow-sm">
+                    <div class="stats-icon-bg bg-info bg-opacity-10 text-info">
+                        <i class="fa-solid fa-users fs-4"></i>
+                    </div>
+                    <h2 class="fw-bold mb-1 text-gradient">{{ candidates_count|default(0) }}</h2>
+                    <p class="text-muted-custom mb-0 fw-semibold">Candidates</p>
+                </div>
             </div>
-            <div class="col-md-3 col-sm-6">
-                <h2 class="fw-bold text-primary mb-1">15k+</h2>
-                <p class="text-muted-custom mb-0">Hired</p>
+            <div class="col-md-3 col-sm-6 stats-card-container">
+                <div class="card card-custom p-4 text-center border-0 shadow-sm">
+                    <div class="stats-icon-bg bg-warning bg-opacity-10 text-warning">
+                        <i class="fa-solid fa-circle-check fs-4"></i>
+                    </div>
+                    <h2 class="fw-bold mb-1 text-gradient">{{ hired_count|default(0) }}</h2>
+                    <p class="text-muted-custom mb-0 fw-semibold">Applications Hired</p>
+                </div>
             </div>
         </div>
     </div>
@@ -80,7 +101,9 @@
                         </div>
                         <span class="job-type-badge">{{ job.job_type }}</span>
                     </div>
-                    <h5 class="fw-bold mb-1"><a href="{{ url_for('job_details', job_id=job.job_id) }}" class="text-decoration-none text-reset">{{ job.title }}</a></h5>
+                    <h5 class="fw-bold mb-1">
+                        <a href="{{ url_for('job_details', job_id=job.job_id) }}" class="text-decoration-none text-reset hover-accent">{{ job.title }}</a>
+                    </h5>
                     <p class="text-muted-custom mb-3"><i class="fa-solid fa-briefcase me-2"></i>{{ job.company_name }}</p>
                     
                     <div class="d-flex align-items-center text-muted-custom mb-4 small">
@@ -105,7 +128,7 @@
     </div>
 </section>
 
-<!-- Top Companies -->
+<!-- Top Companies Section with Interactive branding -->
 <section class="py-5 bg-white">
     <div class="container">
         <div class="text-center mb-5">
@@ -114,14 +137,36 @@
         </div>
         
         <div class="row g-4 justify-content-center text-center">
-            <!-- Add MySQL query here later: loop through top companies -->
-            {% for i in range(1, 7) %}
             <div class="col-md-2 col-4">
-                <div class="p-3 border rounded shadow-sm company-logo-container bg-light d-flex align-items-center justify-content-center" style="height: 100px;">
+                <div class="p-3 border rounded shadow-sm company-logo-container bg-light d-flex align-items-center justify-content-center hover-shadow-glow" style="height: 100px; transition: var(--transition-bounce);">
                     <i class="fa-brands fa-aws fs-1 text-muted"></i>
                 </div>
             </div>
-            {% endfor %}
+            <div class="col-md-2 col-4">
+                <div class="p-3 border rounded shadow-sm company-logo-container bg-light d-flex align-items-center justify-content-center hover-shadow-glow" style="height: 100px; transition: var(--transition-bounce);">
+                    <i class="fa-brands fa-google fs-1 text-muted"></i>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="p-3 border rounded shadow-sm company-logo-container bg-light d-flex align-items-center justify-content-center hover-shadow-glow" style="height: 100px; transition: var(--transition-bounce);">
+                    <i class="fa-brands fa-microsoft fs-1 text-muted"></i>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="p-3 border rounded shadow-sm company-logo-container bg-light d-flex align-items-center justify-content-center hover-shadow-glow" style="height: 100px; transition: var(--transition-bounce);">
+                    <i class="fa-brands fa-apple fs-1 text-muted"></i>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="p-3 border rounded shadow-sm company-logo-container bg-light d-flex align-items-center justify-content-center hover-shadow-glow" style="height: 100px; transition: var(--transition-bounce);">
+                    <i class="fa-brands fa-github fs-1 text-muted"></i>
+                </div>
+            </div>
+            <div class="col-md-2 col-4">
+                <div class="p-3 border rounded shadow-sm company-logo-container bg-light d-flex align-items-center justify-content-center hover-shadow-glow" style="height: 100px; transition: var(--transition-bounce);">
+                    <i class="fa-brands fa-meta fs-1 text-muted"></i>
+                </div>
+            </div>
         </div>
     </div>
 </section>

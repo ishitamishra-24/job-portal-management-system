@@ -9,8 +9,8 @@
         <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse" id="sidebarMenu">
             <div class="position-sticky">
                 <div class="text-center mb-4">
-                    <img src="https://ui-avatars.com/api/?name={{ session.get('name', 'Candidate') }}&background=0D8ABC&color=fff&size=100" class="rounded-circle mb-3 shadow-sm" alt="Profile">
-                    <h5 class="fw-bold mb-0">{{ session.get('name', 'Candidate Name') }}</h5>
+                    <img src="https://ui-avatars.com/api/?name={{ session.get('name', 'Candidate') }}&background=0D8ABC&color=fff&size=100&bold=true" class="rounded-circle mb-3 shadow-sm animate-pulse" alt="Profile">
+                    <h5 class="fw-bold mb-0 text-dark">{{ session.get('name', 'Candidate Name') }}</h5>
                     <p class="text-muted-custom small">Candidate Account</p>
                 </div>
                 
@@ -23,6 +23,11 @@
                             <i class="fa-solid fa-chart-pie me-2"></i> Dashboard Overview
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="sidebar-link" href="{{ url_for('jobs') }}">
+                            <i class="fa-solid fa-briefcase me-2"></i> Find Jobs
+                        </a>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -30,7 +35,7 @@
         <!-- Dashboard Main Content -->
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-4 border-bottom">
-                <h1 class="h2 fw-bold">Candidate Dashboard</h1>
+                <h1 class="h2 fw-bold text-dark">Candidate Dashboard</h1>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <a href="{{ url_for('jobs') }}" class="btn btn-sm btn-primary-custom">
                         <i class="fa-solid fa-magnifying-glass me-1"></i> Find Jobs
@@ -38,42 +43,240 @@
                 </div>
             </div>
 
-            <!-- Stats Cards -->
+            <!-- Stats & Resume Upload Cards -->
             <div class="row g-4 mb-4">
-                <div class="col-md-4">
-                    <div class="card card-custom p-3 border-start border-primary border-4 h-100">
+                <div class="col-md-4 col-12">
+                    <div class="card card-custom p-4 border-start border-primary border-4 h-100">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <p class="text-muted-custom mb-1 fw-medium">Applied Jobs</p>
-                                <h3 class="fw-bold mb-0">{{ total_applied }}</h3>
+                                <p class="text-muted-custom mb-1 fw-bold text-uppercase small">Applied Jobs</p>
+                                <h2 class="fw-bold mb-0 text-dark">{{ total_applied }}</h2>
                             </div>
-                            <div class="p-3 bg-primary bg-opacity-10 text-primary rounded">
-                                <i class="fa-solid fa-paper-plane fs-4"></i>
+                            <div class="p-3 bg-primary bg-opacity-10 text-primary rounded-circle">
+                                <i class="fa-solid fa-paper-plane fs-3"></i>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-8">
-                    <div class="card card-custom p-3 h-100">
-                        <form action="{{ url_for('upload_resume') }}" method="POST" enctype="multipart/form-data" class="d-flex align-items-center">
-                            <div class="flex-grow-1 me-3">
-                                <label for="resume" class="form-label fw-medium mb-1">Upload Resume (PDF/DOCX)</label>
-                                <input type="file" class="form-control form-control-sm" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+                <div class="col-md-8 col-12">
+                    <div class="card card-custom p-4 h-100">
+                        <h6 class="fw-bold mb-3"><i class="fa-solid fa-file-lines text-primary me-2"></i>Upload Professional Resume</h6>
+                        
+                        {% if candidate.resume %}
+                            <div class="alert alert-success d-flex align-items-center justify-content-between p-2 mb-3 border-success-subtle">
+                                <span class="small text-success"><i class="fa-solid fa-circle-check me-2"></i><strong>Active Resume:</strong> {{ candidate.resume }}</span>
+                                <a href="{{ url_for('download_resume', filename=candidate.resume) }}" class="btn btn-sm btn-success text-white py-1 px-3" download><i class="fa-solid fa-download me-1"></i> Download</a>
                             </div>
-                            <div class="mt-4 pt-1">
-                                <button type="submit" class="btn btn-sm btn-primary-custom">
-                                    <i class="fa-solid fa-upload me-1"></i> Upload
-                                </button>
-                            </div>
+                        {% else %}
+                            <div class="alert alert-warning p-2 small mb-3 border-warning-subtle"><i class="fa-solid fa-triangle-exclamation me-2"></i>No resume uploaded yet. Recruiter matching requires a resume.</div>
+                        {% endif %}
+                        
+                        <form id="resume-form" action="{{ url_for('upload_resume') }}" method="POST" enctype="multipart/form-data" class="d-flex flex-column flex-sm-row gap-2">
+                            <input type="file" class="form-control form-control-sm" id="resume" name="resume" accept=".pdf,.doc,.docx" required>
+                            <button type="submit" class="btn btn-sm btn-primary-custom text-nowrap"><i class="fa-solid fa-upload me-1"></i> Update Resume</button>
                         </form>
                     </div>
                 </div>
             </div>
 
-            <!-- Recent Applications Table -->
-            <div class="card card-custom mb-4">
-                <div class="card-header bg-white py-3">
-                    <h5 class="fw-bold mb-0">My Applications</h5>
+            <!-- Profile Info Editor -->
+            <div class="card card-custom mb-4 border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-regular fa-id-card text-primary me-2"></i>Profile & Career Details</h5>
+                </div>
+                <div class="card-body">
+                    <form id="profile-form" action="{{ url_for('candidate_update_profile') }}" method="POST">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="fullname" class="form-label small fw-bold text-dark">Full Name</label>
+                                <input type="text" class="form-control" id="fullname" name="fullname" value="{{ candidate.fullname or '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Email Address (Primary Account Key)</label>
+                                <input type="email" class="form-control bg-light text-muted" value="{{ candidate.email or '' }}" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label small fw-bold text-dark">Phone Number</label>
+                                <input type="text" class="form-control" id="phone" name="phone" value="{{ candidate.phone or '' }}" placeholder="+1 (555) 000-0000">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="skills" class="form-label small fw-bold text-dark">Skills (Comma-separated for Job Matcher)</label>
+                                <input type="text" class="form-control" id="skills" name="skills" value="{{ candidate.skills or '' }}" placeholder="e.g. Python, SQL, Flask, HTML, CSS">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="github_link" class="form-label small fw-bold text-dark">GitHub URL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-brands fa-github"></i></span>
+                                    <input type="url" class="form-control" id="github_link" name="github_link" value="{{ candidate.github_link or '' }}" placeholder="https://github.com/username">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="linkedin_link" class="form-label small fw-bold text-dark">LinkedIn URL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-brands fa-linkedin text-primary"></i></span>
+                                    <input type="url" class="form-control" id="linkedin_link" name="linkedin_link" value="{{ candidate.linkedin_link or '' }}" placeholder="https://linkedin.com/in/username">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="headline" class="form-label small fw-bold text-dark">Professional Headline</label>
+                                <input type="text" class="form-control" id="headline" name="headline" value="{{ candidate.headline or '' }}" placeholder="e.g. Senior Software Engineer / Full Stack Developer">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="portfolio_url" class="form-label small fw-bold text-dark">Portfolio URL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa-solid fa-globe text-primary"></i></span>
+                                    <input type="url" class="form-control" id="portfolio_url" name="portfolio_url" value="{{ candidate.portfolio_url or '' }}" placeholder="https://myportfolio.com">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label for="summary" class="form-label small fw-bold text-dark">Career Summary</label>
+                                <textarea class="form-control" id="summary" name="summary" rows="3" placeholder="Briefly describe your professional background, career goals, and core expertise...">{{ candidate.summary or '' }}</textarea>
+                            </div>
+                            
+                            <div class="col-12 mt-4 text-end">
+                                <button type="submit" class="btn btn-primary-custom px-4"><i class="fa-regular fa-floppy-disk me-2"></i>Save Changes</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Proposed Interview Slots Section -->
+            {% if proposed_slots %}
+            <div class="card card-custom mb-4 border-0 shadow-sm border-start border-warning border-4">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-hourglass-half text-warning me-2"></i>Proposed Interview Slots</h5>
+                    <p class="text-muted small mb-0">Please accept one of the proposed slots below to book your interview, or decline if none work for you.</p>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for slot in proposed_slots %}
+                        <div class="col-md-6 col-12">
+                            <div class="border rounded p-3 bg-white shadow-sm position-relative">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-1">{{ slot.job_title }}</h6>
+                                        <p class="text-muted small mb-2"><i class="fa-solid fa-building me-1"></i>{{ slot.company_name }}</p>
+                                        <div class="mb-2 text-dark">
+                                            <i class="fa-regular fa-calendar-days text-primary me-2"></i><strong>Date:</strong> 
+                                            {% if slot.interview_time is string %}
+                                                {{ slot.interview_time }}
+                                            {% else %}
+                                                {{ slot.interview_time.strftime('%b %d, %Y') if slot.interview_time else 'TBD' }}
+                                            {% endif %}
+                                        </div>
+                                        <div class="mb-2 text-dark">
+                                            <i class="fa-regular fa-clock text-primary me-2"></i><strong>Time:</strong> 
+                                            {% if slot.interview_time is string %}
+                                                {{ slot.interview_time }}
+                                            {% else %}
+                                                {{ slot.interview_time.strftime('%I:%M %p') if slot.interview_time else 'TBD' }}
+                                            {% endif %}
+                                            ({{ slot.duration_minutes }} mins)
+                                        </div>
+                                        {% if slot.location_details %}
+                                        <div class="mb-3 text-dark">
+                                            <i class="fa-solid fa-location-dot text-primary me-2"></i><strong>Location/Link:</strong> 
+                                            {% if 'http' in slot.location_details %}
+                                                <a href="{{ slot.location_details }}" target="_blank" class="text-decoration-none text-primary fw-bold">{{ slot.location_details }}</a>
+                                            {% else %}
+                                                {{ slot.location_details }}
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-success px-3 py-1 text-white accept-slot-btn" data-slot-id="{{ slot.slot_id }}">
+                                                <i class="fa-solid fa-check me-1"></i> Accept Slot
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger px-3 py-1 text-white decline-slot-btn" data-slot-id="{{ slot.slot_id }}">
+                                                <i class="fa-solid fa-xmark me-1"></i> Decline
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-warning bg-opacity-10 text-warning px-2 py-1 rounded-pill">Pending Response</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Upcoming Interviews Section -->
+            {% if upcoming_interviews %}
+            <div class="card card-custom mb-4 border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-calendar-days text-primary me-2"></i>Upcoming Interviews</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for iv in upcoming_interviews %}
+                        <div class="col-md-6 col-12">
+                            <div class="interview-card p-3">
+                                <div class="d-flex gap-3">
+                                    <!-- Date Badge -->
+                                    <div class="interview-date-badge text-center flex-shrink-0">
+                                        <span class="month">{{ iv.interview_date.strftime('%b') if iv.interview_date else '' }}</span>
+                                        <span class="day">{{ iv.interview_date.strftime('%d') if iv.interview_date else '' }}</span>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="fw-bold text-dark mb-1">{{ iv.interview_title }}</h6>
+                                        <p class="text-muted-custom small mb-2">
+                                            <i class="fa-solid fa-briefcase me-1"></i>{{ iv.job_title }}
+                                            {% if iv.company_name %} — {{ iv.company_name }}{% endif %}
+                                        </p>
+                                        <div class="d-flex flex-wrap gap-2 mb-2">
+                                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1">
+                                                {% if iv.interview_type == 'Online' %}🖥️{% elif iv.interview_type == 'Offline' %}🏢{% else %}📞{% endif %}
+                                                {{ iv.interview_type }}
+                                            </span>
+                                            <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-1">{{ iv.interview_round }} Round</span>
+                                            <span class="badge interview-status-{{ iv.status|lower }}">{{ iv.status }}</span>
+                                        </div>
+                                        <div class="small text-muted-custom mb-2">
+                                            <i class="fa-regular fa-clock me-1"></i>
+                                            {% if iv.start_time %}
+                                                {% if iv.start_time is string %}{{ iv.start_time }}{% else %}{{ '%02d:%02d'|format(iv.start_time.seconds // 3600, (iv.start_time.seconds % 3600) // 60) }}{% endif %}
+                                            {% endif %}
+                                            —
+                                            {% if iv.end_time %}
+                                                {% if iv.end_time is string %}{{ iv.end_time }}{% else %}{{ '%02d:%02d'|format(iv.end_time.seconds // 3600, (iv.end_time.seconds % 3600) // 60) }}{% endif %}
+                                            {% endif %}
+                                            ({{ iv.timezone or 'IST' }})
+                                        </div>
+                                        {% if iv.meeting_link %}
+                                        <a href="{{ iv.meeting_link }}" target="_blank" class="btn btn-sm btn-primary-custom py-1 px-3 me-2">
+                                            <i class="fa-solid fa-video me-1"></i>Join Meeting
+                                        </a>
+                                        {% endif %}
+                                        <a href="{{ url_for('download_ics', interview_id=iv.interview_id) }}" class="btn btn-sm btn-outline-custom py-1 px-3">
+                                            <i class="fa-regular fa-calendar-plus me-1"></i>Add to Calendar
+                                        </a>
+                                        {% if iv.instructions %}
+                                        <details class="mt-2">
+                                            <summary class="small fw-bold text-muted-custom" style="cursor:pointer;"><i class="fa-solid fa-circle-info me-1"></i>Instructions</summary>
+                                            <p class="small text-muted-custom mt-1 mb-0 ps-3">{{ iv.instructions }}</p>
+                                        </details>
+                                        {% endif %}
+                                        <div class="interview-countdown small text-primary fw-bold mt-2" 
+                                             data-date="{{ iv.interview_date.strftime('%Y-%m-%d') if iv.interview_date else '' }}"
+                                             data-time="{% if iv.start_time %}{% if iv.start_time is string %}{{ iv.start_time }}{% else %}{{ '%02d:%02d'|format(iv.start_time.seconds // 3600, (iv.start_time.seconds % 3600) // 60) }}{% endif %}{% endif %}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Recommended Jobs -->
+            <div class="card card-custom mb-4 border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-wand-magic-sparkles text-primary me-2"></i>Recommended Jobs Matching Your Resume & Profile</h5>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -82,30 +285,120 @@
                                 <tr>
                                     <th class="ps-4">Job Title</th>
                                     <th>Company</th>
-                                    <th>Applied Date</th>
-                                    <th>Status</th>
+                                    <th>Location</th>
+                                    <th>Job Type</th>
                                     <th class="text-end pe-4">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for app in applied_jobs %}
+                                {% for r_job in recommended_jobs %}
                                 <tr>
-                                    <td class="ps-4 fw-medium">{{ app.title }}</td>
-                                    <td>{{ app.company_name }}</td>
-                                    <td class="text-muted-custom">{{ app.applied_at.strftime('%b %d, %Y') if app.applied_at else 'Recently' }}</td>
-                                    <td><span class="badge bg-warning text-dark">{{ app.status }}</span></td>
+                                    <td class="ps-4 fw-bold">
+                                        <a href="{{ url_for('job_details', job_id=r_job.job_id) }}" class="text-decoration-none text-dark hover-accent">{{ r_job.title }}</a>
+                                    </td>
+                                    <td>{{ r_job.company_name }}</td>
+                                    <td><i class="fa-solid fa-location-dot me-1 text-muted"></i>{{ r_job.location }}</td>
+                                    <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20 px-3 py-1 rounded-pill">{{ r_job.job_type }}</span></td>
                                     <td class="text-end pe-4">
-                                        <a href="{{ url_for('job_details', job_id=app.job_id) }}" class="btn btn-sm btn-outline-secondary"><i class="fa-solid fa-eye"></i></a>
+                                        <a href="{{ url_for('job_details', job_id=r_job.job_id) }}" class="btn btn-sm btn-primary-custom py-1 px-3">Apply Now</a>
                                     </td>
                                 </tr>
                                 {% else %}
                                 <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">You haven't applied to any jobs yet.</td>
+                                    <td colspan="5" class="text-center py-5 text-muted-custom">
+                                        <i class="fa-solid fa-sparkles text-muted fs-3 mb-2 d-block"></i>
+                                        <span class="small">Add more skills to your career profile above to unlock personal job recommendations!</span>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+
+            <!-- Stepper Status Tracker -->
+            <div class="card card-custom mb-4 border-0 shadow-sm">
+                <div class="card-header bg-white py-3 border-bottom-0">
+                    <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-list-check text-primary me-2"></i>Active Application Trackers</h5>
+                </div>
+                <div class="card-body">
+                    {% for app in applied_jobs %}
+                    <div class="border rounded p-4 mb-4 bg-white shadow-sm">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center border-bottom pb-3 mb-3">
+                            <div>
+                                <h6 class="fw-bold text-dark mb-1">{{ app.title }}</h6>
+                                <p class="text-muted-custom small mb-0"><i class="fa-solid fa-building me-1"></i>{{ app.company_name }} &bull; Applied on {{ app.applied_at.strftime('%b %d, %Y') if app.applied_at else 'Recently' }}</p>
+                            </div>
+                            <div class="mt-2 mt-sm-0">
+                                {% if app.status == 'Offered' %}
+                                    <span class="badge bg-success text-white py-2 px-3 rounded-pill"><i class="fa-solid fa-trophy me-1"></i> Offered</span>
+                                {% elif app.status == 'Rejected' %}
+                                    <span class="badge bg-danger text-white py-2 px-3 rounded-pill"><i class="fa-solid fa-circle-xmark me-1"></i> Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-primary text-white py-2 px-3 rounded-pill"><i class="fa-regular fa-clock me-1"></i> {{ app.status }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Stepper Logic Setup -->
+                        {% set current_status = app.status %}
+                        {% set step_percent = 0 %}
+                        
+                        {% if current_status == 'New' %}
+                            {% set step_percent = 12 %}
+                        {% elif current_status == 'Reviewed' %}
+                            {% set step_percent = 38 %}
+                        {% elif current_status == 'Interviewing' %}
+                            {% set step_percent = 62 %}
+                        {% elif current_status == 'Offered' or current_status == 'Rejected' %}
+                            {% set step_percent = 100 %}
+                        {% endif %}
+                        
+                        <div class="progress-stepper my-4">
+                            <!-- Stepper background filled width -->
+                            <div class="stepper-line-fill animate-stepper" style="width: {{ step_percent }}%;"></div>
+                            
+                            <!-- Step 1: New / Applied -->
+                            <div class="stepper-step {% if current_status in ['New', 'Reviewed', 'Interviewing', 'Offered'] %}completed{% endif %}">
+                                <div class="step-bubble"><i class="fa-solid fa-file-arrow-up"></i></div>
+                                <div class="step-label text-dark">Applied</div>
+                            </div>
+                            
+                            <!-- Step 2: Under Review -->
+                            <div class="stepper-step {% if current_status in ['Reviewed', 'Interviewing', 'Offered'] %}completed{% endif %} {% if current_status == 'New' %}active{% endif %}">
+                                <div class="step-bubble"><i class="fa-solid fa-magnifying-glass"></i></div>
+                                <div class="step-label text-dark">Reviewed</div>
+                            </div>
+                            
+                            <!-- Step 3: Interviewing -->
+                            <div class="stepper-step {% if current_status in ['Interviewing', 'Offered'] %}completed{% endif %} {% if current_status == 'Reviewed' %}active{% endif %}">
+                                <div class="step-bubble"><i class="fa-regular fa-comments"></i></div>
+                                <div class="step-label text-dark">Interviewing</div>
+                            </div>
+                            
+                            <!-- Step 4: Decision (Offered or Rejected) -->
+                            {% if current_status == 'Rejected' %}
+                            <div class="stepper-step rejected">
+                                <div class="step-bubble"><i class="fa-solid fa-circle-xmark"></i></div>
+                                <div class="step-label text-dark">Rejected</div>
+                            </div>
+                            {% else %}
+                            <div class="stepper-step {% if current_status == 'Offered' %}completed{% endif %} {% if current_status == 'Interviewing' %}active{% endif %}">
+                                <div class="step-bubble"><i class="fa-solid fa-trophy"></i></div>
+                                <div class="step-label text-dark">Offered</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted-custom">
+                        <i class="fa-regular fa-folder-open fs-1 mb-3"></i>
+                        <h6>No Applications Found</h6>
+                        <p class="small">You haven't submitted any job applications yet.</p>
+                        <a href="{{ url_for('jobs') }}" class="btn btn-outline-custom mt-2">Find a Job</a>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
             

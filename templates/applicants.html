@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+
+{% block title %}Applicants - {{ job.title }}{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <!-- Back Breadcrumb -->
+        <div class="mb-4">
+            <a href="{{ url_for('recruiter_dashboard') }}" class="text-muted-custom fw-semibold"><i class="fa-solid fa-arrow-left me-2"></i>Back to Dashboard</a>
+        </div>
+        
+        <!-- Job Header Details -->
+        <div class="card card-custom p-4 mb-4 border-0 shadow-sm">
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center">
+                <div>
+                    <span class="badge bg-primary bg-opacity-10 text-primary mb-2 px-3 py-2 rounded-pill">Recruitment Review</span>
+                    <h3 class="fw-bold mb-1 text-dark">{{ job.title }}</h3>
+                    <p class="text-muted-custom mb-0"><i class="fa-solid fa-location-dot me-1"></i>{{ job.location }} &bull; {{ job.job_type }}</p>
+                </div>
+                <div class="mt-3 mt-sm-0 bg-light p-3 rounded border text-center">
+                    <span class="small text-muted-custom d-block">Required Skills</span>
+                    <span class="fw-bold text-dark">{{ job.skills_required or 'None Specified' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="fw-bold mb-4 text-dark">Received Applications ({{ applicants|length }})</h4>
+        
+        <div class="row g-4">
+            {% for app in applicants %}
+            <div class="col-12">
+                <div class="card card-custom p-4 border-0 shadow-sm">
+                    <div class="row g-3">
+                        <!-- Candidate Info -->
+                        <div class="col-md-4 border-end border-light pr-md-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="https://ui-avatars.com/api/?name={{ app.fullname }}&background=random&color=fff&size=50&bold=true" class="rounded-circle me-3 shadow-sm" alt="Avatar">
+                                <div>
+                                    <h5 class="fw-bold mb-0 text-dark">{{ app.fullname }}</h5>
+                                    <span class="text-muted-custom small">Applied {{ app.applied_at.strftime('%b %d, %Y') if app.applied_at else 'Recently' }}</span>
+                                </div>
+                            </div>
+
+                            {% if app.headline or app.summary %}
+                            <div class="mb-3 p-2 bg-light rounded border border-light-subtle">
+                                {% if app.headline %}
+                                    <div class="fw-bold text-primary small mb-1">{{ app.headline }}</div>
+                                {% endif %}
+                                {% if app.summary %}
+                                    <div class="text-muted small" style="font-style: italic;">"{{ app.summary }}"</div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="small mb-3">
+                                <div class="mb-2"><i class="fa-regular fa-envelope text-primary me-2"></i><a href="mailto:{{ app.email }}" class="text-reset">{{ app.email }}</a></div>
+                                <div class="mb-2"><i class="fa-solid fa-phone text-primary me-2"></i>{{ app.phone or 'No phone number' }}</div>
+                                {% if app.github_link %}
+                                <div class="mb-2"><i class="fa-brands fa-github text-primary me-2"></i><a href="{{ app.github_link }}" target="_blank" class="text-decoration-none">GitHub Profile</a></div>
+                                {% endif %}
+                                {% if app.linkedin_link %}
+                                <div class="mb-2"><i class="fa-brands fa-linkedin text-primary me-2"></i><a href="{{ app.linkedin_link }}" target="_blank" class="text-decoration-none">LinkedIn Profile</a></div>
+                                {% endif %}
+                                {% if app.portfolio_url %}
+                                <div class="mb-2"><i class="fa-solid fa-globe text-primary me-2"></i><a href="{{ app.portfolio_url }}" target="_blank" class="text-decoration-none">Portfolio Website</a></div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Resume Download -->
+                            {% if app.resume %}
+                                <a href="{{ url_for('download_resume', filename=app.resume) }}" class="btn btn-sm btn-outline-success w-100 py-2 mb-3" download><i class="fa-solid fa-file-pdf me-2"></i>Download Resume File</a>
+                            {% else %}
+                                <div class="alert alert-warning p-2 small mb-3"><i class="fa-solid fa-circle-exclamation me-2"></i>No resume uploaded.</div>
+                            {% endif %}
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button class="btn btn-sm btn-primary-custom flex-fill schedule-interview-btn" 
+                                        data-app-id="{{ app.application_id }}" data-candidate-name="{{ app.fullname }}"
+                                        data-candidate-email="{{ app.email }}" data-job-title="{{ job.title }}"
+                                        data-candidate-id="{{ app.user_id }}" data-job-id="{{ job.job_id }}">
+                                    <i class="fa-solid fa-calendar-plus me-1"></i> Schedule Interview
+                                </button>
+                                <button class="btn btn-sm btn-success send-offer-btn flex-fill" data-app-id="{{ app.application_id }}">
+                                    <i class="fa-solid fa-trophy me-1"></i> Send Offer
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger send-rejection-btn flex-fill" data-app-id="{{ app.application_id }}">
+                                    <i class="fa-solid fa-xmark me-1"></i> Reject
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Skill Compatibility Matcher -->
+                        <div class="col-md-5 px-md-4 border-end border-light">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h6 class="fw-bold text-dark mb-0"><i class="fa-solid fa-robot text-primary me-2"></i>Skill Compatibility</h6>
+                                <span class="badge bg-primary text-white py-1 px-3 fs-6 rounded-pill">{{ app.match_pct }}% Match</span>
+                            </div>
+                            
+                            <!-- Progress Bar -->
+                            <div class="progress mb-4" style="height: 8px;">
+                                <div class="progress-bar {% if app.match_pct >= 75 %}bg-success{% elif app.match_pct >= 40 %}bg-warning{% else %}bg-danger{% endif %}" role="progressbar" style="width: {{ app.match_pct }}%;" aria-valuenow="{{ app.match_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            
+                            <!-- Matching tags -->
+                            <div class="mb-3">
+                                <span class="small fw-bold text-success d-block mb-2">Matching Skills:</span>
+                                {% if app.matched_skills %}
+                                    {% for s in app.matched_skills %}
+                                        <span class="skill-tag">{{ s }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted small">No matching skills detected.</span>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Missing tags -->
+                            <div class="mb-3">
+                                <span class="small fw-bold text-muted d-block mb-2">Missing Skills:</span>
+                                {% if app.missing_skills %}
+                                    {% for s in app.missing_skills %}
+                                        <span class="missing-tag">{{ s }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-success small"><i class="fa-solid fa-circle-check me-1"></i>Perfect Match! No missing skills.</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Interview History -->
+                            {% if app.interviews %}
+                            <div class="mt-3 pt-3 border-top">
+                                <h6 class="small fw-bold text-dark mb-2"><i class="fa-solid fa-calendar-check text-primary me-1"></i>Interview Schedule</h6>
+                                {% for iv in app.interviews %}
+                                <div class="d-flex align-items-center justify-content-between py-2 px-2 mb-1 rounded {% if iv.status == 'Scheduled' %}bg-primary bg-opacity-10{% elif iv.status == 'Cancelled' %}bg-danger bg-opacity-10{% else %}bg-light{% endif %}">
+                                    <div class="small">
+                                        <span class="fw-bold">{{ iv.interview_round }}</span> — {{ iv.interview_date.strftime('%b %d') if iv.interview_date else '' }}
+                                        <span class="badge interview-status-{{ iv.status|lower }} ms-1">{{ iv.status }}</span>
+                                    </div>
+                                    {% if iv.status == 'Scheduled' %}
+                                    <button class="btn btn-outline-danger btn-sm py-0 px-2 cancel-interview-btn" data-interview-id="{{ iv.interview_id }}" title="Cancel">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Recruiter Actions & Logs -->
+                        <div class="col-md-3 pl-md-4">
+                            <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-sliders text-primary me-2"></i>Application Status</h6>
+                            
+                            <!-- Status Selector Dropdown -->
+                            <div class="mb-4">
+                                <label class="form-label small text-muted-custom">Update candidate stage:</label>
+                                <select class="form-select form-select-sm applicant-status-select fw-semibold border-2" data-app-id="{{ app.application_id }}" data-original-val="{{ app.status }}">
+                                    <option value="New" {% if app.status == 'New' %}selected{% endif %}>New / Applied</option>
+                                    <option value="Reviewed" {% if app.status == 'Reviewed' %}selected{% endif %}>Reviewed</option>
+                                    <option value="Interviewing" {% if app.status == 'Interviewing' %}selected{% endif %}>Interviewing</option>
+                                    <option value="Offered" {% if app.status == 'Offered' %}selected{% endif %}>Offered / Hired</option>
+                                    <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Database Trigger History Log -->
+                            <div>
+                                <h6 class="small fw-bold text-dark mb-2"><i class="fa-solid fa-clock-rotate-left text-muted me-1"></i>Status History Log</h6>
+                                <ul class="list-group list-group-flush border rounded bg-light overflow-y-auto" id="history-log-{{ app.application_id }}" style="max-height: 110px;">
+                                    {% for log in app.history %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center py-1 px-2 border-0 bg-transparent text-muted small">
+                                        <span><strong>{{ log.old_status }}</strong> &rarr; <strong>{{ log.new_status }}</strong></span>
+                                        <span class="badge bg-light text-dark">{{ log.changed_at.strftime('%b %d, %H:%M') if log.changed_at else 'Recently' }}</span>
+                                    </li>
+                                    {% else %}
+                                    <li class="list-group-item text-center text-muted small py-2 no-history">No changes logged yet.</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center py-5 text-muted-custom bg-white border rounded">
+                <i class="fa-regular fa-envelope-open fs-1 mb-3"></i>
+                <h6>No Applicants Yet</h6>
+                <p class="small">Share this job listing with candidates to receive applications.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Schedule Interview Modal -->
+<div class="modal fade" id="scheduleInterviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light border-0 py-3">
+                <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-calendar-days text-primary me-2"></i>Schedule & Manage Interviews</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-info small p-2 mb-3">
+                    <i class="fa-solid fa-circle-info me-1"></i>
+                    Candidate: <strong id="modal-candidate-name"></strong> &bull; Job: <strong id="modal-job-title"></strong>
+                </div>
+
+                <input type="hidden" id="schedule-app-id">
+
+                <!-- Tabs Navigation -->
+                <ul class="nav nav-tabs mb-4" id="interviewTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold text-dark" id="suggest-tab" data-bs-toggle="tab" data-bs-target="#suggest-tab-pane" type="button" role="tab" aria-controls="suggest-tab-pane" aria-selected="true">
+                            <i class="fa-solid fa-hourglass-half text-warning me-1"></i> Propose Multiple Slots
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold text-dark" id="direct-tab" data-bs-toggle="tab" data-bs-target="#direct-tab-pane" type="button" role="tab" aria-controls="direct-tab-pane" aria-selected="false">
+                            <i class="fa-solid fa-calendar-check text-primary me-1"></i> Direct Fixed Schedule
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tabs Content -->
+                <div class="tab-content" id="interviewTabsContent">
+                    
+                    <!-- TAB 1: PROPOSE / MANAGE SLOTS -->
+                    <div class="tab-pane fade show active" id="suggest-tab-pane" role="tabpanel" aria-labelledby="suggest-tab" tabindex="0">
+                        <h6 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-plus-circle text-primary me-2"></i>Propose a New Slot Suggestion</h6>
+                        <form id="suggest-slot-form" onsubmit="return false;">
+                            <div class="row g-3 mb-4 p-3 rounded bg-light border">
+                                <div class="col-md-5">
+                                    <label class="form-label small fw-bold text-dark">Suggested Date & Time</label>
+                                    <input type="datetime-local" id="slot-time" class="form-control" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold text-dark">Duration (mins)</label>
+                                    <input type="number" id="slot-duration" class="form-control" value="30" min="15" step="15" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold text-dark">Location/Link</label>
+                                    <input type="text" id="slot-location" class="form-control" placeholder="e.g. Google Meet URL or Room 402" required>
+                                </div>
+                                <div class="col-12 text-end">
+                                    <button type="button" id="submit-suggest-slot-btn" class="btn btn-primary-custom btn-sm">
+                                        <i class="fa-solid fa-plus me-1"></i> Add Proposal Slot
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <h6 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-list-ul text-primary me-2"></i>Proposed Slots List</h6>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle border" id="slots-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Duration</th>
+                                        <th>Location/Link</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="slots-list-container">
+                                    <!-- Rendered dynamically by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: DIRECT FIXED SCHEDULE -->
+                    <div class="tab-pane fade" id="direct-tab-pane" role="tabpanel" aria-labelledby="direct-tab" tabindex="0">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label small fw-bold text-dark">Interview Title</label>
+                                <input type="text" id="iv-title" class="form-control" placeholder="e.g. Technical Screening Round">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">Interview Type</label>
+                                <select id="iv-type" class="form-select">
+                                    <option value="Online">🖥️ Online</option>
+                                    <option value="Offline">🏢 Offline</option>
+                                    <option value="Phone">📞 Phone</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">Round</label>
+                                <select id="iv-round" class="form-select">
+                                    <option value="HR">HR</option>
+                                    <option value="Technical">Technical</option>
+                                    <option value="Final">Final</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">Timezone</label>
+                                <select id="iv-timezone" class="form-select">
+                                    <option value="IST">IST (India)</option>
+                                    <option value="EST">EST (US East)</option>
+                                    <option value="PST">PST (US West)</option>
+                                    <option value="GMT">GMT (UK)</option>
+                                    <option value="CET">CET (Europe)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">Date</label>
+                                <input type="date" id="iv-date" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">Start Time</label>
+                                <input type="time" id="iv-start" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold text-dark">End Time</label>
+                                <input type="time" id="iv-end" class="form-control">
+                            </div>
+                            
+                            <!-- Conditional fields -->
+                            <div class="col-md-12" id="meeting-link-group">
+                                <label class="form-label small fw-bold text-dark">Meeting Link (Google Meet / Teams / Zoom)</label>
+                                <input type="url" id="iv-meeting-link" class="form-control" placeholder="https://meet.google.com/...">
+                            </div>
+                            <div class="col-md-12 d-none" id="office-address-group">
+                                <label class="form-label small fw-bold text-dark">Office Address</label>
+                                <textarea id="iv-office-address" class="form-control" rows="2" placeholder="Full office address for in-person interview"></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Interviewer Name</label>
+                                <input type="text" id="iv-interviewer-name" class="form-control" value="{{ session.get('name', '') }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Interviewer Email</label>
+                                <input type="email" id="iv-interviewer-email" class="form-control" placeholder="interviewer@company.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Contact Phone</label>
+                                <input type="tel" id="iv-contact-phone" class="form-control" placeholder="+91 98765 43210">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-dark">Required Documents</label>
+                                <input type="text" id="iv-required-docs" class="form-control" placeholder="e.g. ID Proof, Certificates">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label small fw-bold text-dark">Additional Instructions</label>
+                                <textarea id="iv-instructions" class="form-control" rows="3" placeholder="Any special instructions for the candidate..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0 py-3">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <!-- Direct Schedule Tab Submit Button -->
+                <button type="button" class="btn btn-primary-custom d-none" id="submit-schedule-btn">
+                    <i class="fa-solid fa-paper-plane me-1"></i> Schedule & Send Invite
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

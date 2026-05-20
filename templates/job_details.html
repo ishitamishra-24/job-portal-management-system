@@ -1,117 +1,182 @@
 {% extends 'base.html' %}
 
-{% block title %}Job Details - Job Portal{% endblock %}
+{% block title %}{{ job.title }} - Job Details{% endblock %}
 
 {% block content %}
-<!-- Job Header -->
-<section class="bg-primary text-white py-5" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);">
+<section class="py-5 bg-light">
     <div class="container">
-        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between">
-            <div class="d-flex align-items-center mb-4 mb-md-0">
-                <div class="company-logo bg-white text-primary me-4" style="width: 80px; height: 80px; font-size: 2.5rem;">
-                    <i class="fa-solid fa-code"></i>
-                </div>
-                <div>
-                    <h1 class="fw-bold mb-2">{{ job.title }}</h1>
-                    <div class="d-flex flex-wrap gap-3 text-white-50 align-items-center">
-                        <span><i class="fa-solid fa-briefcase me-2"></i>{{ job.company_name }}</span>
-                        <span><i class="fa-solid fa-location-dot me-2"></i>{{ job.location }}</span>
-                        <span><i class="fa-regular fa-clock me-2"></i>Posted {{ job.posted_at.strftime('%b %d, %Y') if job.posted_at else 'Recently' }}</span>
-                        <span class="badge bg-white text-primary rounded-pill px-3 py-2">{{ job.job_type }}</span>
+        <!-- Back link -->
+        <div class="mb-4">
+            <a href="{{ url_for('jobs') }}" class="text-muted-custom fw-semibold"><i class="fa-solid fa-arrow-left me-2"></i>Back to Search</a>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Job Core Info & Description -->
+            <div class="col-lg-8">
+                <div class="card card-custom p-4 mb-4 border-0 shadow-sm">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="company-logo me-3">
+                                <i class="fa-solid fa-building"></i>
+                            </div>
+                            <div>
+                                <h3 class="fw-bold mb-1">{{ job.title }}</h3>
+                                <p class="text-muted-custom mb-0"><i class="fa-solid fa-briefcase me-2"></i>{{ job.company_name }}</p>
+                            </div>
+                        </div>
+                        <span class="job-type-badge mt-2 mt-sm-0">{{ job.job_type }}</span>
+                    </div>
+                    
+                    <hr class="text-muted opacity-25">
+                    
+                    <div class="row g-3 py-3 mb-3">
+                        <div class="col-sm-4">
+                            <div class="text-muted-custom small mb-1">Salary Range</div>
+                            <div class="fw-bold text-primary"><i class="fa-solid fa-money-bill-wave me-1"></i>{{ job.salary if job.salary else 'Not Disclosed' }}</div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="text-muted-custom small mb-1">Location</div>
+                            <div class="fw-bold"><i class="fa-solid fa-location-dot me-1"></i>{{ job.location }}</div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="text-muted-custom small mb-1">Date Posted</div>
+                            <div class="fw-bold"><i class="fa-regular fa-calendar-days me-1"></i>{{ job.posted_at.strftime('%b %d, %Y') if job.posted_at else 'Recently' }}</div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-3">Skills Required</h5>
+                    <div class="mb-4">
+                        {% if job.skills_required %}
+                            {% for skill in job.skills_required.split(',') %}
+                                <span class="badge bg-light text-dark border py-2 px-3 me-2 mb-2 rounded-pill"><i class="fa-solid fa-tag text-primary me-1"></i>{{ skill.strip() }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted small">No specific skills listed.</span>
+                        {% endif %}
+                    </div>
+
+                    <h5 class="fw-bold mb-3">Job Description</h5>
+                    <div class="text-muted-custom" style="line-height: 1.7; white-space: pre-line;">
+                        {{ job.skills_required }}
+                        
+                        This is a premium career opportunity posted on JobPortal. We are looking for highly motivated professionals to join our dynamic team and build next-generation applications. 
+                        
+                        Key Responsibilities:
+                        • Collaborate with design, product, and QA engineering teams to build high-quality web applications.
+                        • Optimize database schemas and write high-performing SQL queries for relational databases (MySQL).
+                        • Develop clean, reusable, testable code conforming to coding standards and design principles.
+                        • Troubleshoot bottlenecks and maintain software compatibility.
                     </div>
                 </div>
+                
+                <!-- Similar Jobs -->
+                <h4 class="fw-bold mb-4">Similar Jobs</h4>
+                <div class="row g-4">
+                    {% for sim_job in similar_jobs %}
+                    <div class="col-md-6">
+                        <div class="card card-custom job-card p-4">
+                            <h5 class="fw-bold mb-1"><a href="{{ url_for('job_details', job_id=sim_job.job_id) }}" class="text-decoration-none text-reset hover-accent">{{ sim_job.title }}</a></h5>
+                            <p class="text-muted-custom small mb-3"><i class="fa-solid fa-briefcase me-2"></i>{{ sim_job.company_name }}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto">
+                                <span class="fw-bold text-primary">{{ sim_job.salary if sim_job.salary else 'Not Disclosed' }}</span>
+                                <a href="{{ url_for('job_details', job_id=sim_job.job_id) }}" class="btn btn-outline-custom btn-sm">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-12 text-muted small">No similar jobs found.</div>
+                    {% endfor %}
+                </div>
             </div>
-            <div class="d-flex flex-column gap-2 text-md-end">
-                <h3 class="fw-bold mb-0 text-white">{{ job.salary if job.salary else 'Not Disclosed' }}</h3>
-                <form action="{{ url_for('apply_job', job_id=job.job_id) }}" method="POST" class="d-inline mt-2">
-                    <button type="submit" class="btn btn-light text-primary fw-bold px-4 py-2 w-100">Apply Now</button>
-                </form>
+            
+            <!-- Job Action Panel & Skill Matcher Sidebar -->
+            <div class="col-lg-4">
+                <!-- Apply / Save card -->
+                <div class="card card-custom p-4 mb-4 border-0 shadow-sm text-center">
+                    <h5 class="fw-bold mb-3">Interested in this role?</h5>
+                    
+                    {% if session.get('role') == 'candidate' %}
+                        {% if candidate_resume %}
+                            <div class="alert alert-success p-2 mb-3 border-success-subtle text-start text-success small">
+                                <i class="fa-solid fa-circle-check me-2"></i><strong>Resume Shared:</strong> {{ candidate_resume }}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning p-2 mb-3 border-warning-subtle text-start text-warning small">
+                                <i class="fa-solid fa-triangle-exclamation me-2"></i>No resume uploaded. Upload one in your <a href="{{ url_for('candidate_dashboard') }}" class="fw-bold text-decoration-none text-warning">Dashboard</a> to share it.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    <div class="d-grid gap-3">
+                        <form action="{{ url_for('apply_job', job_id=job.job_id) }}" method="POST">
+                            <button type="submit" class="btn btn-primary-custom w-100 py-3"><i class="fa-regular fa-paper-plane me-2"></i>Apply for Job</button>
+                        </form>
+                        <form action="{{ url_for('save_job', job_id=job.job_id) }}" method="POST">
+                            <button type="submit" class="btn btn-outline-custom w-100 py-3"><i class="fa-regular fa-bookmark me-2"></i>Save for Later</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Intelligent Skill Matcher Module -->
+                <div class="card card-custom p-4 border-0 shadow-sm skill-matcher-card text-center">
+                    <h5 class="fw-bold mb-2"><i class="fa-solid fa-robot text-primary me-2"></i>Intelligent Matcher</h5>
+                    
+                    {% if match_data %}
+                        {% if match_data.has_skills %}
+                            <!-- Circular SVG Match Indicator -->
+                            <div class="match-ring-wrapper my-4">
+                                <svg class="match-ring-svg">
+                                    <circle class="match-ring-bg" cx="70" cy="70" r="60"></circle>
+                                    <circle class="match-ring-progress" cx="70" cy="70" r="60" data-percent="{{ match_data.pct }}"></circle>
+                                </svg>
+                                <div class="match-percentage-text">{{ match_data.pct }}%</div>
+                            </div>
+                            
+                            <p class="text-muted-custom small mb-4">Your profile match index for this job posting based on database skill analysis.</p>
+                            
+                            <!-- Skill Tags Matching status -->
+                            <div class="text-start mb-3">
+                                <h6 class="fw-bold text-success mb-2"><i class="fa-regular fa-circle-check me-2"></i>Matching Skills ({{ match_data.matched|length }})</h6>
+                                {% if match_data.matched %}
+                                    <div class="mb-3">
+                                        {% for s in match_data.matched %}
+                                            <span class="skill-tag">{{ s }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted small mb-3">No matching skills found.</p>
+                                {% endif %}
+                                
+                                <h6 class="fw-bold text-muted mb-2"><i class="fa-regular fa-circle-question me-2"></i>Missing Skills ({{ match_data.missing|length }})</h6>
+                                {% if match_data.missing %}
+                                    <div>
+                                        {% for s in match_data.missing %}
+                                            <span class="missing-tag">{{ s }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted small">Great job! You have all skills matching.</p>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="py-4">
+                                <i class="fa-solid fa-circle-info text-info fs-1 mb-3"></i>
+                                <h6 class="fw-bold">No Skills Profiled</h6>
+                                <p class="text-muted-custom small mb-3">Update the skills list on your dashboard to see your matching score immediately.</p>
+                                <a href="{{ url_for('candidate_dashboard') }}" class="btn btn-outline-custom btn-sm">Update Profile</a>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="py-4">
+                            <i class="fa-solid fa-lock text-muted fs-1 mb-3"></i>
+                            <h6 class="fw-bold">Analyze Your Match Score</h6>
+                            <p class="text-muted-custom small mb-3">Log in as a candidate to verify your skills match percentage against this employer's requirements.</p>
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-custom btn-sm">Login to Match</a>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
 </section>
-
-<div class="container py-5">
-    <div class="row">
-        <!-- Main Details -->
-        <div class="col-lg-8 mb-4 mb-lg-0">
-            <div class="card card-custom p-4 p-md-5 mb-4">
-                <h4 class="fw-bold mb-4">Job Description</h4>
-                
-                <p class="text-muted-custom mb-4" style="white-space: pre-wrap;">{{ job.skills_required }}</p>
-                
-            </div>
-        </div>
-        
-        <!-- Sidebar Details -->
-        <div class="col-lg-4">
-            <!-- Company Info -->
-            <div class="card card-custom p-4 mb-4">
-                <h5 class="fw-bold mb-4">Company Overview</h5>
-                <div class="d-flex align-items-center mb-3">
-                    <div class="company-logo me-3">
-                        <i class="fa-solid fa-building"></i>
-                    </div>
-                    <div>
-                        <h6 class="fw-bold mb-0">{{ job.company_name }}</h6>
-                    </div>
-                </div>
-                <p class="text-muted-custom small mb-4">
-                    Leading provider of innovative products and services in the industry.
-                </p>
-            </div>
-            
-            <!-- Actions -->
-            <div class="card card-custom p-4">
-                <h5 class="fw-bold mb-3">Job Overview</h5>
-                
-                <div class="d-flex align-items-center mb-3">
-                    <i class="fa-regular fa-calendar text-primary me-3 fs-5"></i>
-                    <div>
-                        <div class="text-muted-custom small">Date Posted</div>
-                        <div class="fw-medium">{{ job.posted_at.strftime('%b %d, %Y') if job.posted_at else 'Recently' }}</div>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center mb-4">
-                    <i class="fa-solid fa-layer-group text-primary me-3 fs-5"></i>
-                    <div>
-                        <div class="text-muted-custom small">Job Type</div>
-                        <div class="fw-medium">{{ job.job_type }}</div>
-                    </div>
-                </div>
-                
-                <form action="{{ url_for('save_job', job_id=job.job_id) }}" method="POST">
-                    <button type="submit" class="btn btn-outline-custom w-100 mb-2"><i class="fa-regular fa-bookmark me-2"></i> Save Job</button>
-                </form>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Similar Jobs Section -->
-    {% if similar_jobs %}
-    <div class="mt-5 pt-4 border-top">
-        <h3 class="fw-bold mb-4">Similar Jobs</h3>
-        <div class="row g-4">
-            {% for s_job in similar_jobs %}
-            <div class="col-lg-4 col-md-6">
-                <div class="card card-custom job-card">
-                    <div class="d-flex justify-content-between mb-3">
-                        <div class="company-logo">
-                            <i class="fa-solid fa-briefcase"></i>
-                        </div>
-                        <span class="job-type-badge">{{ s_job.job_type }}</span>
-                    </div>
-                    <h5 class="fw-bold mb-1"><a href="{{ url_for('job_details', job_id=s_job.job_id) }}" class="text-decoration-none text-reset">{{ s_job.title }}</a></h5>
-                    <p class="text-muted-custom mb-3"><i class="fa-solid fa-briefcase me-2"></i>{{ s_job.company_name }}</p>
-                    <div class="d-flex justify-content-between align-items-center mt-auto">
-                        <span class="fw-bold text-primary">{{ s_job.salary if s_job.salary else 'Not Disclosed' }}</span>
-                        <a href="{{ url_for('job_details', job_id=s_job.job_id) }}" class="btn btn-outline-custom btn-sm">View</a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-</div>
 {% endblock %}
